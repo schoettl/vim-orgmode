@@ -238,9 +238,10 @@ class Date(object):
 
 		# format
 		if isinstance(newdate, datetime):
-			newdate = cls.locale_independent_strftime(newdate, u'%Y-%m-%d %a %H:%M')
+			timestamp_format = u'%Y-%m-%d %a %H:%M'
 		else:
-			newdate = cls.locale_independent_strftime(newdate, u'%Y-%m-%d %a')
+			timestamp_format = u'%Y-%m-%d %a'
+		newdate = cls.locale_independent_strftime(newdate, timestamp_format)
 		timestamp = u'<%s>' % newdate if active else u'[%s]' % newdate
 
 		insert_at_cursor(timestamp)
