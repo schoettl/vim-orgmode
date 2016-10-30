@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 from datetime import timedelta, date, datetime
+import locale
 
 import vim
 
@@ -225,7 +226,7 @@ class Date(object):
 		today = date.today()
 		msg = u''.join([
 			u'Inserting ',
-			unicode(u_decode(today.strftime(u'%Y-%m-%d %a'))),
+			unicode(u_decode(cls.locale_independent_strftime(today, u'%Y-%m-%d %a'))),
 			u' | Modify date'])
 		modifier = get_user_input(msg)
 
@@ -237,11 +238,10 @@ class Date(object):
 
 		# format
 		if isinstance(newdate, datetime):
-			newdate = newdate.strftime(
-				u_decode(u_encode(u'%Y-%m-%d %a %H:%M')))
+			timestamp_format = u'%Y-%m-%d %a %H:%M'
 		else:
-			newdate = newdate.strftime(
-				u_decode(u_encode(u'%Y-%m-%d %a')))
+			timestamp_format = u'%Y-%m-%d %a'
+		newdate = cls.locale_independent_strftime(newdate, timestamp_format)
 		timestamp = u'<%s>' % newdate if active else u'[%s]' % newdate
 
 		insert_at_cursor(timestamp)
@@ -266,6 +266,15 @@ class Date(object):
 		timestamp_template = u'<%s>' if active else u'[%s]'
 		# timestamp template
 		vim.command("let g:org_timestamp_template = '" + timestamp_template + "'")
+
+	@classmethod
+	def locale_independent_strftime(cls, date, format):
+		savedLocale = locale.setlocale(locale.LC_TIME)
+		try:
+		    locale.setlocale(locale.LC_TIME, "C")
+		    return date.strftime(u_decode(u_encode(format)))
+		finally:
+		    locale.setlocale(locale.LC_TIME, savedLocale)
 
 	def register(self):
 		u"""
